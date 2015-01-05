@@ -48,6 +48,13 @@ public class AllureRunListener extends RunListener {
         parentDescription = description;
     }
 
+    /**
+     * Find feature and story for given scenario
+     *
+     * @param scenarioName
+     * @return array of {"<FEATURE_NAME>", "<STORY_NAME>"}
+     * @throws IllegalAccessException
+     */
     String[] findFeatureByScenarioName(String scenarioName) throws IllegalAccessException {
         ArrayList<Description> features = parentDescription.getChildren().get(0).getChildren();
         //Feature cycle
@@ -79,24 +86,26 @@ public class AllureRunListener extends RunListener {
     }
 
     public void testSuiteStarted(Description description) throws IllegalAccessException {
-        String uid = generateSuiteUid(description.getClassName());
-
-        TestSuiteStartedEvent event = new TestSuiteStartedEvent(uid, description.getClassName());
 
         String[] annotationParams = findFeatureByScenarioName(description.getDisplayName());
 
+        //Create feature and story annotations. Remove unnecessary words from it
         Features feature = getFeaturesAnnotation(new String[]{annotationParams[0].split(":")[1].trim()});
         Stories story = getStoriesAnnotation(new String[]{annotationParams[1].split(":")[1].trim()});
 
+        //If it`s Scenario Outline, add example string to story name
         if (description.getDisplayName().startsWith("|")
                 || description.getDisplayName().endsWith("|")) {
             story = getStoriesAnnotation(new String[]{annotationParams[1].split(":")[1].trim()
                 + " " + description.getDisplayName()});
         }
-        
+
+        String uid = generateSuiteUid(description.getClassName());
+        TestSuiteStartedEvent event = new TestSuiteStartedEvent(uid, story.value()[0]);
+
         //Add feature and story annotations
         Collection<Annotation> annotations = new ArrayList<>();
-        for (Annotation annotation:description.getAnnotations()) {
+        for (Annotation annotation : description.getAnnotations()) {
             annotations.add(annotation);
         }
         annotations.add(story);
@@ -109,6 +118,12 @@ public class AllureRunListener extends RunListener {
         getLifecycle().fire(event);
     }
 
+    /**
+     * Creates Story annotation object
+     *
+     * @param value story names array
+     * @return Story annotation object
+     */
     Stories getStoriesAnnotation(final String[] value) {
         Stories stories = new Stories() {
 
@@ -125,6 +140,12 @@ public class AllureRunListener extends RunListener {
         return stories;
     }
 
+    /**
+     * Creates Feature annotation object
+     *
+     * @param value feature names array
+     * @return Feature annotation object
+     */
     Features getFeaturesAnnotation(final String[] value) {
         Features features = new Features() {
 
