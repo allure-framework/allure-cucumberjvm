@@ -1,4 +1,4 @@
-package ru.clicman.tests;
+package ru.yandex.qatools.allure.cucumberjvm;
 
 import cucumber.api.CucumberOptions;
 import cucumber.api.junit.Cucumber;
