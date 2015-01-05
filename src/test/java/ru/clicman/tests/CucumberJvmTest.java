@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
  * @author sidochenko
  */
 @RunWith(Cucumber.class)
-@CucumberOptions(features = {"src/test/resources/"}, tags = "~@wip")
+@CucumberOptions(features = {"src/test/resources/"}, tags = "~@failed")
 public class CucumberJvmTest {
     
 }
