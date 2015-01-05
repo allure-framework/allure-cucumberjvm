@@ -1,61 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>allure-core</artifactId>
-        <groupId>ru.yandex.qatools.allure</groupId>
-        <version>1.4.6-SNAPSHOT</version>
-    </parent>
+
+    <name>Allure Cucumber-JVM Adaptor</name>
+    <artifactId>allure-cucumber-jvm-adaptor</artifactId>
+    <groupId>ru.yandex.qatools.allure</groupId>
+    <version>1.4.5-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>allure-cucumber-jvm-adaptor</artifactId>
-    <name>Allure Cucumber-JVM Adaptor</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <compiler.version>1.7</compiler.version>
         
-        <allure.version>1.4.3</allure.version>
+        <allure.version>1.4.5</allure.version>
         <aspectj.version>1.7.4</aspectj.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>ru.yandex.qatools.allure</groupId>
+            <artifactId>allure-core</artifactId>
+            <version>${allure.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>ru.yandex.qatools.allure</groupId>
             <artifactId>allure-java-aspects</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
+            <version>${allure.version}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>ru.yandex.qatools.allure</groupId>
             <artifactId>allure-commons</artifactId>
-            <scope>test</scope>
+            <version>${allure.version}</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-junit</artifactId>
             <version>1.2.0</version>
-            <scope>test</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-core</artifactId>
             <version>1.2.0</version>
-            <scope>test</scope>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-java</artifactId>
             <version>1.2.0</version>
-            <scope>test</scope>
             <type>jar</type>
         </dependency>
         <dependency>
