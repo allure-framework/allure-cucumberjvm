@@ -38,34 +38,31 @@ public class AllureRunListener extends RunListener {
 
     private final Map<String, String> suites = new HashMap<>();
 
+    /**
+     * All tests object
+     */
     private Description parentDescription;
 
     @Override
     public void testRunStarted(Description description) {
-        if (description == null) {
-            // If you don't pass junit provider - surefire (<= 2.17) pass null instead of description
-            return;
-        }
-
         parentDescription = description;
-
     }
 
     String[] findFeatureByScenarioName(String scenarioName) throws IllegalAccessException {
         ArrayList<Description> features = parentDescription.getChildren().get(0).getChildren();
-        //Перебор фич
+        //Feature cycle
         for (Description feature : features) {
-            //Перебор сценариев
+            //Story cycle
             for (Description story : feature.getChildren()) {
                 Object scenarioType = FieldUtils.readField(story, "fUniqueId", true);
 
-                //Работа со сценарием
+                //Scenario
                 if (scenarioType instanceof Scenario) {
                     if (story.getDisplayName().equals(scenarioName)) {
                         return new String[]{feature.getDisplayName(), scenarioName};
                     }
 
-                    // Работа с outline
+                    //Scenario Outline
                 } else {
                     ArrayList<Description> examples = story.getChildren().get(0).getChildren();
                     // we need to go deeper :)
@@ -77,7 +74,7 @@ public class AllureRunListener extends RunListener {
                 }
             }
         }
-        //TODO: изменить тип на более приемлимый
+        //TODO: change method return type to smth better
         return new String[]{"Undefined Feature", scenarioName};
     }
 
