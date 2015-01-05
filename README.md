@@ -48,4 +48,4 @@ Simply add **allure-allure-cucumber-jvm-adaptor** as dependency to your project 
 ```
 
 Then execute **mvn clean test** goal.
-After tests executed allure xml will placed in **target/allure-results/** directory
+After tests executed allure xmls will placed in **target/allure-results/** directory
