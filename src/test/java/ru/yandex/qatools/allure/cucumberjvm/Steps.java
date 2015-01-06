@@ -46,7 +46,7 @@ public class Steps {
             Object o = 1;
             String fail = (String) o;
         } catch (Exception e) {
-            this.createAttachment(Arrays.toString(e.getStackTrace()));
+            makeAttach(e.getMessage());
             throw e;
         }
     }
@@ -61,10 +61,9 @@ public class Steps {
 
     }
 
-    @Attachment()
-    private byte[] createAttachment(String att) {
-        String content = att;
-        return content.getBytes();
+   @Attachment
+    public String makeAttach(String text) {
+        return text;
     }
 
 }
