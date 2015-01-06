@@ -169,7 +169,6 @@ public class AllureRunListener extends RunListener {
             TestCaseStartedEvent event = new TestCaseStartedEvent(getSuiteUid(description), description.getMethodName());
             AnnotationManager am = new AnnotationManager(description.getAnnotations());
             am.update(event);
-            fireClearStepStorage();
             getLifecycle().fire(event);
         }
     }
@@ -244,7 +243,6 @@ public class AllureRunListener extends RunListener {
         AnnotationManager am = new AnnotationManager(description.getAnnotations());
         am.update(event);
 
-        fireClearStepStorage();
         getLifecycle().fire(event);
     }
 
