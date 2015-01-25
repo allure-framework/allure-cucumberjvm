@@ -7,7 +7,6 @@ import java.util.Collection;
 import org.junit.Ignore;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.Description;
-import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import ru.yandex.qatools.allure.Allure;
@@ -33,16 +32,16 @@ import ru.yandex.qatools.allure.annotations.Stories;
  * @author Viktor Sidochenko viktor.sidochenko@gmail.com
  */
 public class AllureRunListener extends RunListener {
-    
+
     private Allure lifecycle = Allure.LIFECYCLE;
-    
+
     private final Map<String, String> suites = new HashMap<>();
 
     /**
      * All tests object
      */
     private Description parentDescription;
-    
+
     @Override
     public void testRunStarted(Description description) {
         parentDescription = description;
@@ -84,9 +83,9 @@ public class AllureRunListener extends RunListener {
         //TODO: change method return type to smth better
         return new String[]{"Undefined Feature", scenarioName};
     }
-    
+
     public void testSuiteStarted(Description description) throws IllegalAccessException {
-        
+
         String[] annotationParams = findFeatureByScenarioName(description.getDisplayName());
 
         //Create feature and story annotations. Remove unnecessary words from it
@@ -99,7 +98,7 @@ public class AllureRunListener extends RunListener {
             story = getStoriesAnnotation(new String[]{annotationParams[1].split(":")[1].trim()
                 + " " + description.getDisplayName()});
         }
-        
+
         String uid = generateSuiteUid(description.getClassName());
         TestSuiteStartedEvent event = new TestSuiteStartedEvent(uid, story.value()[0]);
 
@@ -112,9 +111,9 @@ public class AllureRunListener extends RunListener {
         annotations.add(feature);
         AnnotationManager am = new AnnotationManager(annotations);
         am.update(event);
-        
+
         event.withLabels(AllureModelUtils.createTestFrameworkLabel("JUnit"));
-        
+
         getLifecycle().fire(event);
     }
 
@@ -126,12 +125,12 @@ public class AllureRunListener extends RunListener {
      */
     Stories getStoriesAnnotation(final String[] value) {
         Stories stories = new Stories() {
-            
+
             @Override
             public String[] value() {
                 return value;
             }
-            
+
             @Override
             public Class<? extends Annotation> annotationType() {
                 return Stories.class;
@@ -148,12 +147,12 @@ public class AllureRunListener extends RunListener {
      */
     Features getFeaturesAnnotation(final String[] value) {
         Features features = new Features() {
-            
+
             @Override
             public String[] value() {
                 return value;
             }
-            
+
             @Override
             public Class<? extends Annotation> annotationType() {
                 return Features.class;
@@ -161,10 +160,10 @@ public class AllureRunListener extends RunListener {
         };
         return features;
     }
-    
+
     @Override
     public void testStarted(Description description) throws IllegalAccessException {
-        
+
         if (description.isTest()) {
             TestCaseStartedEvent event = new TestCaseStartedEvent(getSuiteUid(description), description.getMethodName());
             AnnotationManager am = new AnnotationManager(description.getAnnotations());
@@ -172,26 +171,26 @@ public class AllureRunListener extends RunListener {
             getLifecycle().fire(event);
         }
     }
-    
+
     @Override
     public void testFailure(Failure failure) {
         // Produces additional failure step for all test case  
         fireTestCaseFailure(failure.getException());
-        
+
     }
-    
+
     @Override
     public void testAssumptionFailure(Failure failure) {
         testFailure(failure);
     }
-    
+
     @Override
     public void testIgnored(Description description) throws IllegalAccessException {
         startFakeTestCase(description);
         getLifecycle().fire(new TestCasePendingEvent().withMessage(getIgnoredMessage(description)));
         finishFakeTestCase();
     }
-    
+
     @Override
     public void testFinished(Description description) throws IllegalAccessException {
         if (description.isSuite()) {
@@ -200,11 +199,11 @@ public class AllureRunListener extends RunListener {
             getLifecycle().fire(new TestCaseFinishedEvent());
         }
     }
-    
+
     public void testSuiteFinished(String uid) {
         getLifecycle().fire(new TestSuiteFinishedEvent(uid));
     }
-    
+
     public String generateSuiteUid(String suiteName) {
         String uid = UUID.randomUUID().toString();
         synchronized (getSuites()) {
@@ -212,7 +211,7 @@ public class AllureRunListener extends RunListener {
         }
         return uid;
     }
-    
+
     public String getSuiteUid(Description description) throws IllegalAccessException {
         String suiteName = description.getClassName();
         if (!getSuites().containsKey(suiteName)) {
@@ -222,7 +221,7 @@ public class AllureRunListener extends RunListener {
         }
         return getSuites().get(suiteName);
     }
-    
+
     public String
             getIgnoredMessage(Description description) {
         Ignore ignore = description.getAnnotation(Ignore.class
@@ -231,22 +230,22 @@ public class AllureRunListener extends RunListener {
                 == null || ignore.value()
                 .isEmpty() ? "Test ignored (without reason)!" : ignore.value();
     }
-    
+
     public void startFakeTestCase(Description description) throws IllegalAccessException {
         String uid = getSuiteUid(description);
-        
+
         String name = description.isTest() ? description.getMethodName() : description.getClassName();
         TestCaseStartedEvent event = new TestCaseStartedEvent(uid, name);
         AnnotationManager am = new AnnotationManager(description.getAnnotations());
         am.update(event);
-        
+
         getLifecycle().fire(event);
     }
-    
+
     public void finishFakeTestCase() {
         getLifecycle().fire(new TestCaseFinishedEvent());
     }
-    
+
     public void fireTestCaseFailure(Throwable throwable) {
         if (throwable instanceof AssumptionViolatedException) {
             getLifecycle().fire(new TestCaseCanceledEvent().withThrowable(throwable));
@@ -254,19 +253,19 @@ public class AllureRunListener extends RunListener {
             getLifecycle().fire(new TestCaseFailureEvent().withThrowable(throwable));
         }
     }
-    
+
     public void fireClearStepStorage() {
         getLifecycle().fire(new ClearStepStorageEvent());
     }
-    
+
     public Allure getLifecycle() {
         return lifecycle;
     }
-    
+
     public void setLifecycle(Allure lifecycle) {
         this.lifecycle = lifecycle;
     }
-    
+
     public Map<String, String> getSuites() {
         return suites;
     }
