@@ -7,7 +7,6 @@ import java.util.Collection;
 import org.junit.Ignore;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.Description;
-import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 import ru.yandex.qatools.allure.Allure;
@@ -193,19 +192,16 @@ public class AllureRunListener extends RunListener {
     }
 
     @Override
-    public void testFinished(Description description) {
-        getLifecycle().fire(new TestCaseFinishedEvent());
+    public void testFinished(Description description) throws IllegalAccessException {
+        if (description.isSuite()) {
+            testSuiteFinished(getSuiteUid(description));
+        } else {
+            getLifecycle().fire(new TestCaseFinishedEvent());
+        }
     }
 
     public void testSuiteFinished(String uid) {
         getLifecycle().fire(new TestSuiteFinishedEvent(uid));
-    }
-
-    @Override
-    public void testRunFinished(Result result) {
-        for (String uid : getSuites().values()) {
-            testSuiteFinished(uid);
-        }
     }
 
     public String generateSuiteUid(String suiteName) {
