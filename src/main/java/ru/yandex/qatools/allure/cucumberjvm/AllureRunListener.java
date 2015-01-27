@@ -112,7 +112,7 @@ public class AllureRunListener extends RunListener {
         AnnotationManager am = new AnnotationManager(annotations);
         am.update(event);
 
-        event.withLabels(AllureModelUtils.createTestFrameworkLabel("JUnit"));
+        event.withLabels(AllureModelUtils.createTestFrameworkLabel("CucumberJVM"));
 
         getLifecycle().fire(event);
     }
