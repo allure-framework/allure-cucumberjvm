@@ -60,7 +60,7 @@
         <compiler.version>1.7</compiler.version>
         
         <allure.version>1.4.5</allure.version>
-        <aspectj.version>1.8.3</aspectj.version>
+        <aspectj.version>1.8.4</aspectj.version>
     </properties>
     <dependencies>
         <dependency>
@@ -117,7 +117,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18</version>
+                <version>2.18.1</version>
                 <configuration>
                     <testFailureIgnore>false</testFailureIgnore>
                     <argLine>
