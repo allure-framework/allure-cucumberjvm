@@ -13,7 +13,7 @@ Simply add **allure-allure-cucumber-jvm-adaptor** as dependency to your project 
         <dependency>
             <groupId>ru.yandex.qatools.allure</groupId>
             <artifactId>allure-cucumber-jvm-adaptor</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
         </dependency>
     </dependencies>
         <build>
@@ -21,7 +21,7 @@ Simply add **allure-allure-cucumber-jvm-adaptor** as dependency to your project 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18</version>
+                <version>2.18.1</version>
                 <configuration>
                     <testFailureIgnore>false</testFailureIgnore>
                     <argLine>
