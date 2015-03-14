@@ -119,6 +119,12 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18.1</version>
                 <configuration>
+                    <!-- parallel execution configuration -->
+                    <parallel>classes</parallel>
+                    <threadCount>8</threadCount>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
                     <testFailureIgnore>false</testFailureIgnore>
                     <argLine>
                         -javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar

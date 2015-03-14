@@ -1,10 +1,12 @@
 package ru.yandex.qatools.allure.cucumberjvm;
 
+import gherkin.formatter.model.Feature;
 import gherkin.formatter.model.Scenario;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -49,45 +51,102 @@ public class AllureRunListener extends RunListener {
     }
 
     /**
+     * Find features level
+     *
+     * @param description {@link Description} Description to search where
+     * @return {@link List<Description>} features description list
+     * @throws IllegalAccessException
+     */
+    private List<Description> findFeaturesLevel(List<Description> description)
+            throws IllegalAccessException {
+        if (description.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Object readField = FieldUtils.readField(description.get(0), "fUniqueId", true);
+        if (readField instanceof Feature) {
+            return description;
+        } else {
+            return findFeaturesLevel(description.get(0).getChildren());
+        }
+
+    }
+
+    /**
+     * Find test classes level
+     *
+     * @param description {@link Description} Description to search where
+     * @return {@link List<Description>} test classes description list
+     * @throws IllegalAccessException
+     */
+    public List<Description> findTestClassesLevel(List<Description> description) throws IllegalAccessException {
+        if (description.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Object possibleClass = FieldUtils.readField(description.get(0), "fUniqueId", true);
+        if (possibleClass instanceof String && !((String) possibleClass).isEmpty()) {
+            if (!description.get(0).getChildren().isEmpty()) {
+                Object possibleFeature = FieldUtils.readField(description.get(0).getChildren().get(0), "fUniqueId", true);
+                if (possibleFeature instanceof Feature) {
+                    return description;
+                } else {
+                    return findTestClassesLevel(description.get(0).getChildren());
+                }
+            } else {
+                //No scenarios in feature
+                return description;
+            }
+
+        } else {
+            return findTestClassesLevel(description.get(0).getChildren());
+        }
+
+    }
+
+    /**
      * Find feature and story for given scenario
      *
      * @param scenarioName
-     * @return array of {"<FEATURE_NAME>", "<STORY_NAME>"}
+     * @return {@link String[]} of ["<FEATURE_NAME>", "<STORY_NAME>"]s
      * @throws IllegalAccessException
      */
-    String[] findFeatureByScenarioName(String scenarioName) throws IllegalAccessException {
-        ArrayList<Description> features = parentDescription.getChildren().get(0).getChildren();
-        //Feature cycle
-        for (Description feature : features) {
-            //Story cycle
-            for (Description story : feature.getChildren()) {
-                Object scenarioType = FieldUtils.readField(story, "fUniqueId", true);
+    private String[] findFeatureByScenarioName(String scenarioName) throws IllegalAccessException {
+        List<Description> testClasses = findTestClassesLevel(parentDescription.getChildren());
 
-                //Scenario
-                if (scenarioType instanceof Scenario) {
-                    if (story.getDisplayName().equals(scenarioName)) {
-                        return new String[]{feature.getDisplayName(), scenarioName};
-                    }
+        for (Description testClass : testClasses) {
 
-                    //Scenario Outline
-                } else {
-                    ArrayList<Description> examples = story.getChildren().get(0).getChildren();
-                    // we need to go deeper :)
-                    for (Description example : examples) {
-                        if (example.getDisplayName().equals(scenarioName)) {
-                            return new String[]{feature.getDisplayName(), story.getDisplayName()};
+            List<Description> features = findFeaturesLevel(testClass.getChildren());
+            //Feature cycle
+            for (Description feature : features) {
+                //Story cycle
+                for (Description story : feature.getChildren()) {
+                    Object scenarioType = FieldUtils.readField(story, "fUniqueId", true);
+
+                    //Scenario
+                    if (scenarioType instanceof Scenario) {
+                        if (story.getDisplayName().equals(scenarioName)) {
+                            return new String[]{feature.getDisplayName(), scenarioName};
+                        }
+
+                        //Scenario Outline
+                    } else {
+                        ArrayList<Description> examples = story.getChildren().get(0).getChildren();
+                        // we need to go deeper :)
+                        for (Description example : examples) {
+                            if (example.getDisplayName().equals(scenarioName)) {
+                                return new String[]{feature.getDisplayName(), story.getDisplayName()};
+                            }
                         }
                     }
                 }
             }
         }
         //TODO: change method return type to smth better
-        return new String[]{"Undefined Feature", scenarioName};
+        return new String[]{"Feature: Undefined Feature", scenarioName};
     }
 
     public void testSuiteStarted(Description description, String suiteName) throws IllegalAccessException {
 
-        String[] annotationParams = findFeatureByScenarioName(description.getDisplayName());
+        String[] annotationParams = findFeatureByScenarioName(suiteName);
 
         //Create feature and story annotations. Remove unnecessary words from it
         Features feature = getFeaturesAnnotation(new String[]{annotationParams[0].split(":")[1].trim()});
