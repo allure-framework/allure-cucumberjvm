@@ -2,6 +2,7 @@ package ru.yandex.qatools.allure.cucumberjvm;
 
 import gherkin.formatter.model.Feature;
 import gherkin.formatter.model.Scenario;
+import gherkin.formatter.model.ScenarioOutline;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,13 +63,29 @@ public class AllureRunListener extends RunListener {
         if (description.isEmpty()) {
             return new ArrayList<>();
         }
-        Object readField = FieldUtils.readField(description.get(0), "fUniqueId", true);
-        if (readField instanceof Feature) {
+        Object entityType = getTestEntityType(description.get(0));
+        if (entityType instanceof Feature) {
             return description;
         } else {
             return findFeaturesLevel(description.get(0).getChildren());
         }
 
+    }
+
+    /**
+     * Get Description unique object
+     *
+     * @param description See {@link Description}
+     * @return {@link Object} what represents by uniqueId on {@link Description}
+     * creation as an arbitrary object used to define its type.<br>
+     * It can be instance of {@link String}, {@link Feature}, {@link Scenario}
+     * or {@link ScenarioOutline}.<br>
+     * In case of {@link String} object it could be Suite, TestClass or an
+     * empty, regardless to level of {@link #parentDescription}
+     * @throws IllegalAccessException
+     */
+    private Object getTestEntityType(Description description) throws IllegalAccessException {
+        return FieldUtils.readField(description, "fUniqueId", true);
     }
 
     /**
@@ -82,10 +99,10 @@ public class AllureRunListener extends RunListener {
         if (description.isEmpty()) {
             return new ArrayList<>();
         }
-        Object possibleClass = FieldUtils.readField(description.get(0), "fUniqueId", true);
+        Object possibleClass = getTestEntityType(description.get(0));
         if (possibleClass instanceof String && !((String) possibleClass).isEmpty()) {
             if (!description.get(0).getChildren().isEmpty()) {
-                Object possibleFeature = FieldUtils.readField(description.get(0).getChildren().get(0), "fUniqueId", true);
+                Object possibleFeature = getTestEntityType(description.get(0).getChildren().get(0));
                 if (possibleFeature instanceof Feature) {
                     return description;
                 } else {
@@ -119,7 +136,7 @@ public class AllureRunListener extends RunListener {
             for (Description feature : features) {
                 //Story cycle
                 for (Description story : feature.getChildren()) {
-                    Object scenarioType = FieldUtils.readField(story, "fUniqueId", true);
+                    Object scenarioType = getTestEntityType(story);
 
                     //Scenario
                     if (scenarioType instanceof Scenario) {
