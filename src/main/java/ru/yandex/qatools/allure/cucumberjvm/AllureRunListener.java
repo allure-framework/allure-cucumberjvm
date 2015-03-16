@@ -52,9 +52,16 @@ public class AllureRunListener extends RunListener {
     }
 
     /**
-     * Find features level
+     * <p>
+     * Find features level<p>
+     * JUnit`s test {@link Description} is multilevel object with liquid
+     * hierarchy.<br>
+     * This method recursively query
+     * {@link #getTestEntityType(org.junit.runner.Description)} method until it
+     * matches {@link Feature} type and when returns list of {@link Feature}
+     * descriptions
      *
-     * @param description {@link Description} Description to search where
+     * @param description {@link Description} Description to start search where
      * @return {@link List<Description>} features description list
      * @throws IllegalAccessException
      */
@@ -89,9 +96,17 @@ public class AllureRunListener extends RunListener {
     }
 
     /**
-     * Find test classes level
+     * <p>
+     * Find Test classes level<p>
+     * JUnit`s test {@link Description} is multilevel object with liquid
+     * hierarchy.<br>
+     * This method recursively query
+     * {@link #getTestEntityType(org.junit.runner.Description)} method until it
+     * matches {@link Feature} type and when returns parent of this object as
+     * list of test classes descriptions
      *
-     * @param description {@link Description} Description to search where
+     *
+     * @param description {@link Description} Description to start search where
      * @return {@link List<Description>} test classes description list
      * @throws IllegalAccessException
      */
