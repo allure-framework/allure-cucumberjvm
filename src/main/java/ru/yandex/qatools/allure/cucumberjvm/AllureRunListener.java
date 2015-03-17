@@ -1,10 +1,13 @@
 package ru.yandex.qatools.allure.cucumberjvm;
 
+import gherkin.formatter.model.Feature;
 import gherkin.formatter.model.Scenario;
+import gherkin.formatter.model.ScenarioOutline;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -49,45 +52,133 @@ public class AllureRunListener extends RunListener {
     }
 
     /**
+     * <p>
+     * Find features level<p>
+     * JUnit`s test {@link Description} is multilevel object with liquid
+     * hierarchy.<br>
+     * This method recursively query
+     * {@link #getTestEntityType(org.junit.runner.Description)} method until it
+     * matches {@link Feature} type and when returns list of {@link Feature}
+     * descriptions
+     *
+     * @param description {@link Description} Description to start search where
+     * @return {@link List<Description>} features description list
+     * @throws IllegalAccessException
+     */
+    private List<Description> findFeaturesLevel(List<Description> description)
+            throws IllegalAccessException {
+        if (description.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Object entityType = getTestEntityType(description.get(0));
+        if (entityType instanceof Feature) {
+            return description;
+        } else {
+            return findFeaturesLevel(description.get(0).getChildren());
+        }
+
+    }
+
+    /**
+     * Get Description unique object
+     *
+     * @param description See {@link Description}
+     * @return {@link Object} what represents by uniqueId on {@link Description}
+     * creation as an arbitrary object used to define its type.<br>
+     * It can be instance of {@link String}, {@link Feature}, {@link Scenario}
+     * or {@link ScenarioOutline}.<br>
+     * In case of {@link String} object it could be Suite, TestClass or an
+     * empty, regardless to level of {@link #parentDescription}
+     * @throws IllegalAccessException
+     */
+    private Object getTestEntityType(Description description) throws IllegalAccessException {
+        return FieldUtils.readField(description, "fUniqueId", true);
+    }
+
+    /**
+     * <p>
+     * Find Test classes level<p>
+     * JUnit`s test {@link Description} is multilevel object with liquid
+     * hierarchy.<br>
+     * This method recursively query
+     * {@link #getTestEntityType(org.junit.runner.Description)} method until it
+     * matches {@link Feature} type and when returns parent of this object as
+     * list of test classes descriptions
+     *
+     *
+     * @param description {@link Description} Description to start search where
+     * @return {@link List<Description>} test classes description list
+     * @throws IllegalAccessException
+     */
+    public List<Description> findTestClassesLevel(List<Description> description) throws IllegalAccessException {
+        if (description.isEmpty()) {
+            return new ArrayList<>();
+        }
+        Object possibleClass = getTestEntityType(description.get(0));
+        if (possibleClass instanceof String && !((String) possibleClass).isEmpty()) {
+            if (!description.get(0).getChildren().isEmpty()) {
+                Object possibleFeature = getTestEntityType(description.get(0).getChildren().get(0));
+                if (possibleFeature instanceof Feature) {
+                    return description;
+                } else {
+                    return findTestClassesLevel(description.get(0).getChildren());
+                }
+            } else {
+                //No scenarios in feature
+                return description;
+            }
+
+        } else {
+            return findTestClassesLevel(description.get(0).getChildren());
+        }
+
+    }
+
+    /**
      * Find feature and story for given scenario
      *
      * @param scenarioName
-     * @return array of {"<FEATURE_NAME>", "<STORY_NAME>"}
+     * @return {@link String[]} of ["<FEATURE_NAME>", "<STORY_NAME>"]s
      * @throws IllegalAccessException
      */
-    String[] findFeatureByScenarioName(String scenarioName) throws IllegalAccessException {
-        ArrayList<Description> features = parentDescription.getChildren().get(0).getChildren();
-        //Feature cycle
-        for (Description feature : features) {
-            //Story cycle
-            for (Description story : feature.getChildren()) {
-                Object scenarioType = FieldUtils.readField(story, "fUniqueId", true);
+    private String[] findFeatureByScenarioName(String scenarioName) throws IllegalAccessException {
+        List<Description> testClasses = findTestClassesLevel(parentDescription.getChildren());
 
-                //Scenario
-                if (scenarioType instanceof Scenario) {
-                    if (story.getDisplayName().equals(scenarioName)) {
-                        return new String[]{feature.getDisplayName(), scenarioName};
-                    }
+        for (Description testClass : testClasses) {
 
-                    //Scenario Outline
-                } else {
-                    ArrayList<Description> examples = story.getChildren().get(0).getChildren();
-                    // we need to go deeper :)
-                    for (Description example : examples) {
-                        if (example.getDisplayName().equals(scenarioName)) {
-                            return new String[]{feature.getDisplayName(), story.getDisplayName()};
+            List<Description> features = findFeaturesLevel(testClass.getChildren());
+            //Feature cycle
+            for (Description feature : features) {
+                //Story cycle
+                for (Description story : feature.getChildren()) {
+                    Object scenarioType = getTestEntityType(story);
+
+                    //Scenario
+                    if (scenarioType instanceof Scenario) {
+                        if (story.getDisplayName().equals(scenarioName)) {
+                            return new String[]{feature.getDisplayName(), scenarioName};
+                        }
+
+                        //Scenario Outline
+                    } else {
+                        ArrayList<Description> examples = story.getChildren().get(0).getChildren();
+                        // we need to go deeper :)
+                        for (Description example : examples) {
+                            if (example.getDisplayName().equals(scenarioName)) {
+                                return new String[]{feature.getDisplayName(), story.getDisplayName()};
+                            }
                         }
                     }
                 }
             }
         }
         //TODO: change method return type to smth better
-        return new String[]{"Undefined Feature", scenarioName};
+        return new String[]{"Feature: Undefined Feature", scenarioName};
     }
 
     public void testSuiteStarted(Description description, String suiteName) throws IllegalAccessException {
 
-        String[] annotationParams = findFeatureByScenarioName(description.getDisplayName());
+        String[] annotationParams = findFeatureByScenarioName(suiteName);
 
         //Create feature and story annotations. Remove unnecessary words from it
         Features feature = getFeaturesAnnotation(new String[]{annotationParams[0].split(":")[1].trim()});
