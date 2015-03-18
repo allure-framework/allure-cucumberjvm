@@ -13,7 +13,7 @@ Simply add **allure-allure-cucumber-jvm-adaptor** as dependency to your project 
         <dependency>
             <groupId>ru.yandex.qatools.allure</groupId>
             <artifactId>allure-cucumber-jvm-adaptor</artifactId>
-            <version>1.2</version>
+            <version>1.3</version>
         </dependency>
     </dependencies>
         <build>
