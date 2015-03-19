@@ -154,14 +154,13 @@ public class AllureRunListener extends RunListener {
                     Object scenarioType = getTestEntityType(story);
 
                     //Scenario
-                    if (scenarioType instanceof Scenario) {
-                        if (story.getDisplayName().equals(scenarioName)) {
-                            return new String[]{feature.getDisplayName(), scenarioName};
-                        }
+                    if (scenarioType instanceof Scenario
+                            && story.getDisplayName().equals(scenarioName)) {
+                        return new String[]{feature.getDisplayName(), scenarioName};
 
                         //Scenario Outline
-                    } else {
-                        ArrayList<Description> examples = story.getChildren().get(0).getChildren();
+                    } else if (scenarioType instanceof ScenarioOutline) {
+                        List<Description> examples = story.getChildren().get(0).getChildren();
                         // we need to go deeper :)
                         for (Description example : examples) {
                             if (example.getDisplayName().equals(scenarioName)) {
@@ -172,10 +171,9 @@ public class AllureRunListener extends RunListener {
                 }
             }
         }
-        //TODO: change method return type to smth better
         return new String[]{"Feature: Undefined Feature", scenarioName};
     }
-
+    
     public void testSuiteStarted(Description description, String suiteName) throws IllegalAccessException {
 
         String[] annotationParams = findFeatureByScenarioName(suiteName);
@@ -216,7 +214,7 @@ public class AllureRunListener extends RunListener {
      * @return Story annotation object
      */
     Stories getStoriesAnnotation(final String[] value) {
-        Stories stories = new Stories() {
+        return new Stories() {
 
             @Override
             public String[] value() {
@@ -224,11 +222,10 @@ public class AllureRunListener extends RunListener {
             }
 
             @Override
-            public Class<? extends Annotation> annotationType() {
+            public Class<Stories> annotationType() {
                 return Stories.class;
             }
         };
-        return stories;
     }
 
     /**
@@ -238,7 +235,7 @@ public class AllureRunListener extends RunListener {
      * @return Feature annotation object
      */
     Features getFeaturesAnnotation(final String[] value) {
-        Features features = new Features() {
+        return new Features() {
 
             @Override
             public String[] value() {
@@ -246,11 +243,10 @@ public class AllureRunListener extends RunListener {
             }
 
             @Override
-            public Class<? extends Annotation> annotationType() {
+            public Class<Features> annotationType() {
                 return Features.class;
             }
         };
-        return features;
     }
 
     @Override
