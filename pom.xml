@@ -59,7 +59,8 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <compiler.version>1.7</compiler.version>
         
-        <allure.version>1.4.5</allure.version>
+        <allure.version>1.4.15</allure.version>
+        <cucumberjvm.version>1.2.4</cucumberjvm.version>
         <aspectj.version>1.8.4</aspectj.version>
     </properties>
     <dependencies>
@@ -84,19 +85,19 @@
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-junit</artifactId>
-            <version>1.2.0</version>
+            <version>${cucumberjvm.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-core</artifactId>
-            <version>1.2.0</version>
+            <version>${cucumberjvm.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>info.cukes</groupId>
             <artifactId>cucumber-java</artifactId>
-            <version>1.2.0</version>
+            <version>${cucumberjvm.version}</version>
             <type>jar</type>
         </dependency>
         <dependency>
