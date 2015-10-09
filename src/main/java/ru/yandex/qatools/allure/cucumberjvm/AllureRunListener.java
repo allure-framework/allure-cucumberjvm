@@ -196,14 +196,13 @@ public class AllureRunListener extends RunListener {
         String uid = generateSuiteUid(suiteName);
         TestSuiteStartedEvent event = new TestSuiteStartedEvent(uid, story.value()[0]);
 
-        Title title = getTitleAnnotation(story.value()[0]);
+        event.setTitle(story.value()[0]);
         
         //Add feature and story annotations
         Collection<Annotation> annotations = new ArrayList<>();
         for (Annotation annotation : description.getAnnotations()) {
             annotations.add(annotation);
         }
-        annotations.add(title);
         annotations.add(story);
         annotations.add(feature);
         AnnotationManager am = new AnnotationManager(annotations);
@@ -236,27 +235,6 @@ public class AllureRunListener extends RunListener {
     }
 
     /**
-     * Creates Title annotation object
-     * 
-     * @param value title sting
-     * @return Title annotation object
-     */
-    Title getTitleAnnotation(final String value) {
-    	return new Title() {
-			
-			@Override
-			public Class<Title> annotationType() {
-				return Title.class;
-			}
-			
-			@Override
-			public String value() {
-				return value;
-			}
-		};
-    }
-    
-    /**
      * Creates Feature annotation object
      *
      * @param value feature names array
@@ -283,14 +261,12 @@ public class AllureRunListener extends RunListener {
         if (description.isTest()) {
             String methodName = extractMethodName(description);
             TestCaseStartedEvent event = new TestCaseStartedEvent(getSuiteUid(description), methodName);
+            event.setTitle(methodName);
             
             Collection<Annotation> annotations = new ArrayList<>();
             for (Annotation annotation : description.getAnnotations()) {
                 annotations.add(annotation);
             }
-            
-            Title title = getTitleAnnotation(description.getDisplayName());
-            annotations.add(title);
             
             AnnotationManager am = new AnnotationManager(annotations);
             am.update(event);
