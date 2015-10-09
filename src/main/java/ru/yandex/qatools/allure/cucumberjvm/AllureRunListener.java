@@ -24,7 +24,6 @@ import org.junit.runner.notification.RunListener;
 import ru.yandex.qatools.allure.Allure;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
-import ru.yandex.qatools.allure.annotations.Title;
 import ru.yandex.qatools.allure.config.AllureModelUtils;
 import ru.yandex.qatools.allure.events.ClearStepStorageEvent;
 import ru.yandex.qatools.allure.events.TestCaseCanceledEvent;
@@ -321,7 +320,7 @@ public class AllureRunListener extends RunListener {
         }
         if (!getSuites().containsKey(suiteName)) {
             //Fix NPE
-        	Description suiteDescription = Description.createSuiteDescription(suiteName);
+            Description suiteDescription = Description.createSuiteDescription(suiteName);
             testSuiteStarted(suiteDescription, suiteName);
         }
         return getSuites().get(suiteName);
