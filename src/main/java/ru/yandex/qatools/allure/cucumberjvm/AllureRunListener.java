@@ -3,6 +3,7 @@ package ru.yandex.qatools.allure.cucumberjvm;
 import gherkin.formatter.model.Feature;
 import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.ScenarioOutline;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,12 +13,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Ignore;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
+
 import ru.yandex.qatools.allure.Allure;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -177,7 +180,7 @@ public class AllureRunListener extends RunListener {
     public void testSuiteStarted(Description description, String suiteName) throws IllegalAccessException {
 
         String[] annotationParams = findFeatureByScenarioName(suiteName);
-
+        
         //Create feature and story annotations. Remove unnecessary words from it
         Features feature = getFeaturesAnnotation(new String[]{annotationParams[0].split(":")[1].trim()});
         Stories story = getStoriesAnnotation(new String[]{annotationParams[1].split(":")[1].trim()});
@@ -192,6 +195,8 @@ public class AllureRunListener extends RunListener {
         String uid = generateSuiteUid(suiteName);
         TestSuiteStartedEvent event = new TestSuiteStartedEvent(uid, story.value()[0]);
 
+        event.setTitle(story.value()[0]);
+        
         //Add feature and story annotations
         Collection<Annotation> annotations = new ArrayList<>();
         for (Annotation annotation : description.getAnnotations()) {
@@ -255,7 +260,14 @@ public class AllureRunListener extends RunListener {
         if (description.isTest()) {
             String methodName = extractMethodName(description);
             TestCaseStartedEvent event = new TestCaseStartedEvent(getSuiteUid(description), methodName);
-            AnnotationManager am = new AnnotationManager(description.getAnnotations());
+            event.setTitle(methodName);
+            
+            Collection<Annotation> annotations = new ArrayList<>();
+            for (Annotation annotation : description.getAnnotations()) {
+                annotations.add(annotation);
+            }
+            
+            AnnotationManager am = new AnnotationManager(annotations);
             am.update(event);
             getLifecycle().fire(event);
         }
