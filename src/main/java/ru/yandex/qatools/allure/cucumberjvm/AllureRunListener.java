@@ -3,7 +3,6 @@ package ru.yandex.qatools.allure.cucumberjvm;
 import gherkin.formatter.model.Feature;
 import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.ScenarioOutline;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,14 +12,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Ignore;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
-
 import ru.yandex.qatools.allure.Allure;
 import ru.yandex.qatools.allure.annotations.Features;
 import ru.yandex.qatools.allure.annotations.Stories;
@@ -340,6 +337,7 @@ public class AllureRunListener extends RunListener {
 
         String name = description.isTest() ? description.getMethodName() : description.getClassName();
         TestCaseStartedEvent event = new TestCaseStartedEvent(uid, name);
+        event.setTitle(name);
         AnnotationManager am = new AnnotationManager(description.getAnnotations());
         am.update(event);
 
