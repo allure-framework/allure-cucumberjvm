@@ -1,7 +1,7 @@
 [![release](http://github-release-version.herokuapp.com/github/allure-framework/allure-cucumber-jvm-adaptor/release.svg?style=flat)](https://github.com/allure-framework/allure-cucumber-jvm-adaptor/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.allure/allure-cucumber-jvm-adaptor/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.allure/allure-cucumber-jvm-adaptor) [![build](https://img.shields.io/jenkins/s/http/ci.qatools.ru/allure-cucumber-jvm-adaptor_master-deploy.svg?style=flat)](http://ci.qatools.ru/job/allure-cucumber-jvm-adaptor_master-deploy/lastBuild/)
 
 
-# Allure Cucumber-JVM Adaptor
+# Allure Cucumber-JVM Adaptor (JUnit)
 This adaptor allows to generate allure xml reports after cucumber-jvm Junit test execution.
 
 ## Example project
