@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +49,7 @@ import ru.yandex.qatools.allure.utils.AnnotationManager;
  */
 public class AllureReporter implements Reporter, Formatter {
 
-    private static final List<String> SCENARIO_OUTLINE_KEYWORDS = new ArrayList<>();
+    private static final List<String> SCENARIO_OUTLINE_KEYWORDS = Collections.synchronizedList(new ArrayList<String>());
 
     private static final String FAILED = "failed";
     private static final String SKIPPED = "skipped";
@@ -123,7 +124,9 @@ public class AllureReporter implements Reporter, Formatter {
 
         //to avoid duplicate steps in case of Scenario Outline
         if (SCENARIO_OUTLINE_KEYWORDS.contains(scenario.getKeyword())) {
-            gherkinSteps.clear();
+            synchronized (gherkinSteps) {
+                gherkinSteps.clear();
+            }
         }
 
         currentStatus = PASSED;
@@ -174,16 +177,18 @@ public class AllureReporter implements Reporter, Formatter {
 
     @Override
     public void step(Step step) {
-        gherkinSteps.add(step);
+        synchronized (gherkinSteps) {
+            gherkinSteps.add(step);
+        }
     }
 
     @Override
     public void endOfScenarioLifeCycle(Scenario scenario) {
-
-        while (gherkinSteps.peek() != null) {
-            fireCanceledStep(gherkinSteps.remove());
+        synchronized (gherkinSteps) {
+            while (gherkinSteps.peek() != null) {
+                fireCanceledStep(gherkinSteps.remove());
+            }
         }
-
         ALLURE_LIFECYCLE.fire(new TestCaseFinishedEvent());
     }
 
@@ -240,15 +245,15 @@ public class AllureReporter implements Reporter, Formatter {
             this.match = (StepDefinitionMatch) match;
 
             Step step = extractStep(this.match);
+            synchronized (gherkinSteps){
+                while (gherkinSteps.peek() != null && !isEqualSteps(step, gherkinSteps.peek())) {
+                    fireCanceledStep(gherkinSteps.remove());
+                }
 
-            while (gherkinSteps.peek() != null && !isEqualSteps(step, gherkinSteps.peek())) {
-                fireCanceledStep(gherkinSteps.remove());
+                if (isEqualSteps(step, gherkinSteps.peek())) {
+                    gherkinSteps.remove();
+                }
             }
-
-            if (isEqualSteps(step, gherkinSteps.peek())) {
-                gherkinSteps.remove();
-            }
-
             String name = this.match.getStepLocation().getMethodName();
             ALLURE_LIFECYCLE.fire(new StepStartedEvent(name).withTitle(name));
         }
