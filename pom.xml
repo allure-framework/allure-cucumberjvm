@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
         <version>7</version>
     </parent>
-    
+
     <name>Allure Cucumber-JVM Adaptor</name>
     <artifactId>allure-cucumber-jvm-adaptor</artifactId>
     <groupId>ru.yandex.qatools.allure</groupId>
@@ -24,7 +25,8 @@
     <scm>
         <url>https://github.com/allure-framework/allure-cucumber-jvm-adaptor</url>
         <connection>scm:git@github.com:allure-framework/allure-cucumber-jvm-adaptor.git</connection>
-        <developerConnection>scm:git:git@github.com:allure-framework/allure-cucumber-jvm-adaptor.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:allure-framework/allure-cucumber-jvm-adaptor.git
+        </developerConnection>
     </scm>
 
     <issueManagement>
@@ -33,8 +35,8 @@
     </issueManagement>
 
     <ciManagement>
-        <system>TeamCity</system>
-        <url>http://teamcity.qatools.ru/</url>
+        <system>Jenkins</system>
+        <url>http://ci.qatools.ru/</url>
     </ciManagement>
 
     <developers>
@@ -42,6 +44,16 @@
             <id>clicman</id>
             <name>Viktor Sidochenko</name>
             <email>viktor.sidochenko@gmail.com</email>
+        </developer>
+        <developer>
+            <id>gvvinblade</id>
+            <name>Igor Seliverstov</name>
+            <email>gvvinblade@gmail.com</email>
+        </developer>
+        <developer>
+            <id>kirlionik</id>
+            <name>Anton Shapin</name>
+            <email>shapin.anton@gmail.com</email>
         </developer>
     </developers>
 
@@ -51,16 +63,16 @@
             <post>allure@yandex-team.ru</post>
         </mailingList>
     </mailingLists>
-    
+
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <compiler.version>1.7</compiler.version>
-        
-        <allure.version>1.4.15</allure.version>
-        <cucumberjvm.version>1.2.4</cucumberjvm.version>
+
+        <allure.version>1.5.0</allure.version>
+        <cucumberjvm.version>1.2.5</cucumberjvm.version>
         <aspectj.version>1.8.4</aspectj.version>
     </properties>
     <dependencies>
@@ -126,7 +138,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18.1</version>
+                <version>2.19.1</version>
                 <configuration>
                     <!-- parallel execution configuration -->
                     <parallel>classes</parallel>
@@ -137,13 +149,8 @@
                     <testFailureIgnore>false</testFailureIgnore>
                     <argLine>
                         -javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar
+                        -Dcucumber.options="--plugin ru.yandex.qatools.allure.cucumberjvm.AllureReporter"
                     </argLine>
-                    <properties>
-                        <property>
-                            <name>listener</name>
-                            <value>ru.yandex.qatools.allure.cucumberjvm.AllureRunListener</value>
-                        </property>
-                    </properties>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -155,5 +162,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

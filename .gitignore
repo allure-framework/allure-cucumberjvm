@@ -17,3 +17,9 @@ pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
 release.properties
+/allure-report/
+
+
+## idea ##
+.idea/
+allure-cucumber-jvm-adaptor.iml

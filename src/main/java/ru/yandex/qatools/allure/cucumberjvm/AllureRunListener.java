@@ -3,6 +3,7 @@ package ru.yandex.qatools.allure.cucumberjvm;
 import gherkin.formatter.model.Feature;
 import gherkin.formatter.model.Scenario;
 import gherkin.formatter.model.ScenarioOutline;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +13,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.runner.Description;
@@ -33,13 +37,16 @@ import ru.yandex.qatools.allure.events.TestSuiteStartedEvent;
 import ru.yandex.qatools.allure.utils.AnnotationManager;
 
 /**
- * @author Viktor Sidochenko viktor.sidochenko@gmail.com
+ * @deprecated Use {@link AllureReporter} instead
  */
+@Deprecated
 public class AllureRunListener extends RunListener {
 
     private Allure lifecycle = Allure.LIFECYCLE;
-
     private final Map<String, String> suites = new HashMap<>();
+
+    private static final Log LOG = LogFactory.getLog(AllureReporter.class);
+
 
     /**
      * All tests object
@@ -48,6 +55,8 @@ public class AllureRunListener extends RunListener {
 
     @Override
     public void testRunStarted(Description description) {
+        LOG.info("AllureRunListener JUnit listener is deprecated, use AllureReporter cucumber plugin instead. " +
+                "See README on https://github.com/allure-framework/allure-cucumber-jvm-adaptor for details.");
         parentDescription = description;
     }
 
@@ -104,7 +113,6 @@ public class AllureRunListener extends RunListener {
      * {@link #getTestEntityType(org.junit.runner.Description)} method until it
      * matches {@link Feature} type and when returns parent of this object as
      * list of test classes descriptions
-     *
      *
      * @param description {@link Description} Description to start search where
      * @return {@link List<Description>} test classes description list
@@ -173,11 +181,11 @@ public class AllureRunListener extends RunListener {
         }
         return new String[]{"Feature: Undefined Feature", scenarioName};
     }
-    
+
     public void testSuiteStarted(Description description, String suiteName) throws IllegalAccessException {
 
         String[] annotationParams = findFeatureByScenarioName(suiteName);
-        
+
         //Create feature and story annotations. Remove unnecessary words from it
         Features feature = getFeaturesAnnotation(new String[]{annotationParams[0].split(":")[1].trim()});
         Stories story = getStoriesAnnotation(new String[]{annotationParams[1].split(":")[1].trim()});
@@ -186,14 +194,14 @@ public class AllureRunListener extends RunListener {
         if (description.getDisplayName().startsWith("|")
                 || description.getDisplayName().endsWith("|")) {
             story = getStoriesAnnotation(new String[]{annotationParams[1].split(":")[1].trim()
-                + " " + description.getDisplayName()});
+                    + " " + description.getDisplayName()});
         }
 
         String uid = generateSuiteUid(suiteName);
         TestSuiteStartedEvent event = new TestSuiteStartedEvent(uid, story.value()[0]);
 
         event.setTitle(story.value()[0]);
-        
+
         //Add feature and story annotations
         Collection<Annotation> annotations = new ArrayList<>();
         for (Annotation annotation : description.getAnnotations()) {
@@ -258,12 +266,12 @@ public class AllureRunListener extends RunListener {
             String methodName = extractMethodName(description);
             TestCaseStartedEvent event = new TestCaseStartedEvent(getSuiteUid(description), methodName);
             event.setTitle(methodName);
-            
+
             Collection<Annotation> annotations = new ArrayList<>();
             for (Annotation annotation : description.getAnnotations()) {
                 annotations.add(annotation);
             }
-            
+
             AnnotationManager am = new AnnotationManager(annotations);
             am.update(event);
             getLifecycle().fire(event);
@@ -324,7 +332,7 @@ public class AllureRunListener extends RunListener {
     }
 
     public String
-            getIgnoredMessage(Description description) {
+    getIgnoredMessage(Description description) {
         Ignore ignore = description.getAnnotation(Ignore.class
         );
         return ignore

@@ -1,14 +1,14 @@
 [![release](http://github-release-version.herokuapp.com/github/allure-framework/allure-cucumber-jvm-adaptor/release.svg?style=flat)](https://github.com/allure-framework/allure-cucumber-jvm-adaptor/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.allure/allure-cucumber-jvm-adaptor/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.allure/allure-cucumber-jvm-adaptor) [![build](https://img.shields.io/jenkins/s/http/ci.qatools.ru/allure-cucumber-jvm-adaptor_master-deploy.svg?style=flat)](http://ci.qatools.ru/job/allure-cucumber-jvm-adaptor_master-deploy/lastBuild/)
 
 
-# Allure Cucumber-JVM Adaptor (JUnit)
-This adaptor allows to generate allure xml reports after cucumber-jvm Junit test execution.
+# Allure Cucumber-JVM Adaptor
+This adaptor allows to generate allure xml reports after cucumber-jvm tests execution.
 
 ## Example project
-Example project is located at: https://github.com/allure-examples/allure-cucumber-jvm-example
+Example projects is located at: https://github.com/allure-examples/allure-cucumber-jvm-example
 
 ## Usage
-Simply add **allure-allure-cucumber-jvm-adaptor** as dependency to your project and add **build** section with adaptor listener: 
+Simply add **allure-allure-cucumber-jvm-adaptor** as dependency to your project and add **build** section with adaptor plugin: 
 ```xml
 <project>
 ...
@@ -16,7 +16,7 @@ Simply add **allure-allure-cucumber-jvm-adaptor** as dependency to your project 
         <dependency>
             <groupId>ru.yandex.qatools.allure</groupId>
             <artifactId>allure-cucumber-jvm-adaptor</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.0</version>
         </dependency>
     </dependencies>
         <build>
@@ -24,18 +24,13 @@ Simply add **allure-allure-cucumber-jvm-adaptor** as dependency to your project 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.18.1</version>
+                <version>2.19.1</version>
                 <configuration>
                     <testFailureIgnore>false</testFailureIgnore>
-                    <argLine>
+                   <argLine>
                         -javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar
-                    </argLine>
-                    <properties>
-                        <property>
-                            <name>listener</name>
-                            <value>ru.yandex.qatools.allure.cucumberjvm.AllureRunListener</value>
-                        </property>
-                    </properties>
+                        -Dcucumber.options="--plugin ru.yandex.qatools.allure.cucumberjvm.AllureReporter"
+                    </argLine>                   
                 </configuration>
                 <dependencies>
                     <dependency>
