@@ -10,7 +10,7 @@
     <name>Allure Cucumber-JVM Adaptor</name>
     <artifactId>allure-cucumber-jvm-adaptor</artifactId>
     <groupId>ru.yandex.qatools.allure</groupId>
-    <version>1.6.1</version>
+    <version>1.7-SNAPSHOT</version>
     <modelVersion>4.0.0</modelVersion>
 
     <licenses>
