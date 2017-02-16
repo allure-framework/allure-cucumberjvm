@@ -1,5 +1,6 @@
 package ru.yandex.qatools.allure.cucumberjvm;
 
+import ru.yandex.qatools.allure.cucumberjvm.callback.OnFailureCallback;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 import ru.yandex.qatools.allure.annotations.TestCaseId;
 import ru.yandex.qatools.allure.config.AllureModelUtils;
 import ru.yandex.qatools.allure.events.*;
+import ru.yandex.qatools.allure.exceptions.AllureException;
 import ru.yandex.qatools.allure.model.DescriptionType;
 import ru.yandex.qatools.allure.model.SeverityLevel;
 import ru.yandex.qatools.allure.utils.AnnotationManager;
@@ -48,6 +50,9 @@ import ru.yandex.qatools.allure.utils.AnnotationManager;
  * Allure reporting plugin for cucumber-jvm
  */
 public class AllureReporter implements Reporter, Formatter {
+
+    protected static Class<? extends OnFailureCallback> callback;
+    protected static Object callbackResult;
 
     private static final List<String> SCENARIO_OUTLINE_KEYWORDS = Collections.synchronizedList(new ArrayList<String>());
 
@@ -66,7 +71,7 @@ public class AllureReporter implements Reporter, Formatter {
     private Feature feature;
     private StepDefinitionMatch match;
 
-    private LinkedList<Step> gherkinSteps = new LinkedList<>();
+    private final LinkedList<Step> gherkinSteps = new LinkedList<>();
 
     private String uid;
     private String currentStatus;
@@ -152,7 +157,6 @@ public class AllureReporter implements Reporter, Formatter {
             annotations.add(testCaseId);
         }
 
-
         annotations.add(getFeaturesAnnotation(feature.getName()));
         annotations.add(getStoriesAnnotation(scenario.getName()));
         annotations.add(getDescriptionAnnotation(scenario.getDescription()));
@@ -217,6 +221,9 @@ public class AllureReporter implements Reporter, Formatter {
     public void result(Result result) {
         if (match != null) {
             if (FAILED.equals(result.getStatus())) {
+
+                this.excuteFailureCallback();
+
                 ALLURE_LIFECYCLE.fire(new StepFailureEvent().withThrowable(result.getError()));
                 ALLURE_LIFECYCLE.fire(new TestCaseFailureEvent().withThrowable(result.getError()));
                 currentStatus = FAILED;
@@ -245,7 +252,7 @@ public class AllureReporter implements Reporter, Formatter {
             this.match = (StepDefinitionMatch) match;
 
             Step step = extractStep(this.match);
-            synchronized (gherkinSteps){
+            synchronized (gherkinSteps) {
                 while (gherkinSteps.peek() != null && !isEqualSteps(step, gherkinSteps.peek())) {
                     fireCanceledStep(gherkinSteps.remove());
                 }
@@ -457,5 +464,37 @@ public class AllureReporter implements Reporter, Formatter {
         }
 
         return null;
+    }
+
+    /**
+     * Apply callback which will called on test failure It should be a class
+     * which implements {@link OnFailureCallback}. the call() method can return
+     * result which will be available via
+     * AllureReporter.getFailureCallbackResult() method.
+     *
+     * @param callbackClass
+     */
+    public static void applyFailureCallback(Class<? extends OnFailureCallback> callbackClass) {
+        callback = callbackClass;
+    }
+
+    /**
+     * Returns failure callback result or null
+     *
+     * @param <T> Any type to return
+     * @return Returns failure callback result or null
+     */
+    public static <T> T getFailureCallbackResult() {
+        return (T) callbackResult;
+    }
+    
+    private void excuteFailureCallback() {
+        if (callback != null) {
+            try {
+                callbackResult = callback.newInstance().call();
+            } catch (InstantiationException | IllegalAccessException ex) {
+                throw new AllureException("Could not initialize callback", ex);
+            }
+        }
     }
 }

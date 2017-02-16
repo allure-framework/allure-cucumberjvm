@@ -70,7 +70,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <compiler.version>1.7</compiler.version>
 
-        <allure.version>1.5.0</allure.version>
+        <allure.version>1.5.2</allure.version>
         <cucumberjvm.version>1.2.5</cucumberjvm.version>
         <aspectj.version>1.8.4</aspectj.version>
     </properties>
@@ -121,6 +121,11 @@
             <artifactId>gherkin</artifactId>
             <version>2.12.2</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging-api</artifactId>
+            <version>1.1</version>
         </dependency>
     </dependencies>
 
