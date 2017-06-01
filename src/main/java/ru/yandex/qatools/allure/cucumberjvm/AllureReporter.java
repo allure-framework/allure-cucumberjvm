@@ -1,5 +1,7 @@
 package ru.yandex.qatools.allure.cucumberjvm;
 
+import gherkin.formatter.model.DataTableRow;
+import org.apache.commons.lang3.StringUtils;
 import ru.yandex.qatools.allure.cucumberjvm.callback.OnFailureCallback;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -261,8 +263,9 @@ public class AllureReporter implements Reporter, Formatter {
                     gherkinSteps.remove();
                 }
             }
-            String name = this.match.getStepLocation().getMethodName();
+            String name = this.getStepName(step);
             ALLURE_LIFECYCLE.fire(new StepStartedEvent(name).withTitle(name));
+            createDataTableAttachment(step.getRows());
         }
     }
 
@@ -274,6 +277,18 @@ public class AllureReporter implements Reporter, Formatter {
     @Override
     public void write(String text) {
         ALLURE_LIFECYCLE.fire(new MakeAttachmentEvent(text.getBytes(), "message" + counter++, "text/plain"));
+    }
+
+    private void createDataTableAttachment(final List<DataTableRow> dataTableRows) {
+        if (dataTableRows != null && !dataTableRows.isEmpty()) {
+            final StringBuilder dataTableCsv = new StringBuilder();
+            for (DataTableRow row : dataTableRows) {
+                dataTableCsv.append(StringUtils.join(row.getCells().toArray(), "\t"));
+                dataTableCsv.append('\n');
+            }
+            ALLURE_LIFECYCLE.fire(new MakeAttachmentEvent(dataTableCsv.toString().getBytes(),
+                    "Data table", "text/tab-separated-values"));
+        }
     }
 
     private Step extractStep(StepDefinitionMatch match) {
@@ -321,7 +336,7 @@ public class AllureReporter implements Reporter, Formatter {
     }
 
     private void fireCanceledStep(Step unimplementedStep) {
-        String name = unimplementedStep.getName();
+        String name = getStepName(unimplementedStep);
         ALLURE_LIFECYCLE.fire(new StepStartedEvent(name).withTitle(name));
         ALLURE_LIFECYCLE.fire(new StepCanceledEvent());
         ALLURE_LIFECYCLE.fire(new StepFinishedEvent());
@@ -333,6 +348,11 @@ public class AllureReporter implements Reporter, Formatter {
             }
         });
         currentStatus = SKIPPED;
+    }
+
+    public String getStepName(Step step) {
+        return step.getKeyword() + step.getName();
+
     }
 
     private Description getDescriptionAnnotation(final String description) {
@@ -487,7 +507,7 @@ public class AllureReporter implements Reporter, Formatter {
     public static <T> T getFailureCallbackResult() {
         return (T) callbackResult;
     }
-    
+
     private void excuteFailureCallback() {
         if (callback != null) {
             try {

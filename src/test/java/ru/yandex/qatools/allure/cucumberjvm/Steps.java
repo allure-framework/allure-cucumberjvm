@@ -1,8 +1,6 @@
 package ru.yandex.qatools.allure.cucumberjvm;
 
-import org.junit.Assert;
-
-import ru.yandex.qatools.allure.annotations.Attachment;
+import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -10,7 +8,8 @@ import cucumber.api.java.ru.Дано;
 import cucumber.api.java.ru.Когда;
 import cucumber.api.java.ru.То;
 import cucumber.api.java.ru.Тогда;
-import java.util.Random;
+import org.junit.Assert;
+import ru.yandex.qatools.allure.annotations.Attachment;
 
 public class Steps {
 
@@ -122,4 +121,8 @@ public class Steps {
 //        Thread.sleep(1000 + new Random().nextInt(1000));
     }
 
+    @Given("^data table:$")
+    public void dataTable(DataTable table) throws Throwable {
+
+    }
 }
